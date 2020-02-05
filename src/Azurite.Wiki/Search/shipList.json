@@ -1,0 +1,12 @@
+{
+    "ships":
+    {
+        "_xpath": "//div[@class='mw-parser-output']//tr",
+        "id": "./td[1]/@data-sort-value",
+        "name": "./td[2]/a/@title",
+        "rarity": "./td[3]/text()",
+        "type": "./td[4]/a/text()",
+        "subtype": "./td[contains(@style, 'background-')][last()]/a[1]/text()",
+        "faction": "./td[not(contains(@style, 'background-'))][3]/a[1]/text()"
+    }
+}

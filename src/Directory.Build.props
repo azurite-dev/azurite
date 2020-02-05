@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <NoWarn>1591,1587</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Product>Azurite</Product>
+  </PropertyGroup>
+</Project>

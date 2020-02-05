@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Azurite.Core\Azurite.Core.csproj" />
+    <ProjectReference Include="..\Azurite.Index\Azurite.Index.csproj" />
+    <ProjectReference Include="..\Azurite.Wiki\Azurite.Wiki.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCoreRateLimit" Version="3.0.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="5.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+
+</Project>

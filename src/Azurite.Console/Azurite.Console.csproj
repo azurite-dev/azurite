@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ConsoleTables" Version="2.4.0" />
+    <PackageReference Include="Spectre.Cli" Version="0.29.0" />
+    <PackageReference Include="Spectre.Cli.Extensions.DependencyInjection" Version="0.3.0-alpha0008" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Azurite.Core\Azurite.Core.csproj" />
+    <ProjectReference Include="..\Azurite.Wiki\Azurite.Wiki.csproj" />
+    <ProjectReference Include="..\Azurite.Index\Azurite.Index.csproj" />
+  </ItemGroup>
+
+</Project>

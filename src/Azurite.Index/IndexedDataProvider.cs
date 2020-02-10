@@ -13,6 +13,9 @@ namespace Azurite.Index
         {
             _client = client;
         }
+
+        public bool IsLocal => true;
+
         public Task<IEnumerable<Ship>> GetShipDetails(string shipName)
         {
             // var collection = _client.GetShipCollection().FindAll().ToList();

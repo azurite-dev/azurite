@@ -11,6 +11,7 @@ This API aims to provide basic API access for some data surrounding Azur Lane sh
 This is a new project that's been hacked together over a week or so. As such, it still has some pretty big missing functionality:
 
 - **No stats**: This is planned for right after the API is complete
+  - stats as they currently stand are also using a (sort of unwieldy) fixed schema. This might change in future versions.
 - **No skins**: Still unsure whether this will be included in the API.
 - **Talents**: Talents aren't available and *may not ever be*. Limitations in how we're retrieving data make it a fragile process to build.
 - **Equipment**: Equipment slots are currently included in ship details, but this is currently in preview and **heavily** subject to change

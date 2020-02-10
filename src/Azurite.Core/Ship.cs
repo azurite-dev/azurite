@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static Azurite.Helpers;
 
 namespace Azurite
 {
@@ -12,7 +13,7 @@ namespace Azurite
                 Type = summary.Type,
                 // Subtype = summary.Subtype,
                 Faction = new Faction { Name = summary.FactionName, Prefix = string.Empty},
-                Rarity = Enum.TryParse(summary.Rarity, true, out Rarity rarity) ? rarity : Rarity.None
+                Rarity = ParseRarity(summary.Rarity)
             };
         }
 

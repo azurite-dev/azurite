@@ -19,6 +19,6 @@
         "_xpath": "//table[@class='wikitable']//th[contains(text(), 'Equipment')]/../following-sibling::tr[position()>1]",
         "slot": "./td[1]/text()",
         "efficiency": "./td[2]",
-        "equip": "./td[3]/a[1]/text()"
+        "equip": "./td[3]"
     }
 }

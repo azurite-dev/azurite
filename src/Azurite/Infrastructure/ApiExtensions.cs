@@ -6,7 +6,7 @@ namespace Azurite.Infrastructure
     public static class ApiExtensions
     {
         internal static bool Is(this string s, string value) {
-            return s.Trim().Equals(value.Trim(), System.StringComparison.InvariantCultureIgnoreCase);
+            return !string.IsNullOrWhiteSpace(s) && s.Trim().Equals(value.Trim(), System.StringComparison.InvariantCultureIgnoreCase);
         }
 
         internal static async Task<IEnumerable<Ship>> GetShipDetails(this IShipDataProvider _provider) {

@@ -9,8 +9,12 @@ using Microsoft.Extensions.Logging;
 namespace Azurite.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [Microsoft.AspNetCore.Mvc.TypeFilter(typeof(IndexCheckAttribute))]
+    /// <summary>
+    /// Actions related to ship building, including build times and pools.
+    /// </summary>
     public class BuildController : ControllerBase
     {
         private readonly ILogger<BuildController> _logger;
@@ -24,6 +28,12 @@ namespace Azurite.Controllers
             _provider = provider;
         }
 
+        /// <summary>
+        /// Retrieves all ships with a given build time, optionally filtering by pool.
+        /// </summary>
+        /// <param name="time">The build time when first queued (uses HH:mm:ss form in APIs).</param>
+        /// <param name="type">Optionally filter results to ships from a given construction pool (Light, Heavy, Special).</param>
+        /// <returns>Summary details of all ships with the given build time and from the specified build pool (where specified).</returns>
         [HttpGet("{time:timespan}")]
         public async Task<IEnumerable<ShipSummary>> GetShipsForBuildTime([FromRoute] TimeSpan time, [FromQuery]ConstructionType? type) {
             var shipDetails = await _provider.GetShipDetails();
@@ -34,6 +44,11 @@ namespace Azurite.Controllers
             return matches.Select(ShipSummary.FromShip);
         }
 
+        /// <summary>
+        /// Retrieves all ships from a given build pool.
+        /// </summary>
+        /// <param name="type">The build pool to retrieve ships for (Light, Heavy, Special)</param>
+        /// <returns>Summary details of all ships from the given build pool.</returns>
         [HttpGet("{type}")]
         public async Task<IEnumerable<Ship>> GetShipsForBuildPool([FromRoute]ConstructionType type) {
             var shipDetails = await _provider.GetShipDetails();

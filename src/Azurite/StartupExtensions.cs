@@ -49,6 +49,15 @@ namespace Azurite
             return services;
         }
 
+        public static IServiceCollection AddVersioning(this IServiceCollection services) {
+            services.AddVersionedApiExplorer(o => {
+                o.GroupNameFormat = "'v'VVV";
+                o.SubstituteApiVersionInUrl = true;
+            });
+            services.AddApiVersioning();
+            return services;
+        }
+
         public static IApplicationBuilder UseSwashbuckle(this IApplicationBuilder app) {
             app.UseSwagger(o => {
                 o.RouteTemplate = "/api/{documentName}/swagger.json";
@@ -59,13 +68,19 @@ namespace Azurite
             return app;
         }
 
-        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app) {
+        public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, bool whitelistSwagger = true) {
             var opts = app.ApplicationServices.GetService<IOptions<IpRateLimitOptions>>();
             if (opts.Value.EndpointWhitelist == null) {
                 opts.Value.EndpointWhitelist = new List<string>();
             }
-            opts.Value.EndpointWhitelist.Add("get:/api/help*");
-            opts.Value.EndpointWhitelist.Add("get:/api/v1/*");
+            if (whitelistSwagger) {
+                var swagger = app.ApplicationServices.GetService<Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorOptions>();
+                foreach (var doc in swagger.SwaggerDocs)
+                {
+                    opts.Value.EndpointWhitelist.Add($"get:/api/{doc.Key}/swagger.json");
+                }
+                opts.Value.EndpointWhitelist.Add("get:/api/help*");
+            }
             app.UseIpRateLimiting();
             return app;
         }

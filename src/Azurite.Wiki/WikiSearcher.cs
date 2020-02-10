@@ -16,6 +16,8 @@ namespace Azurite.Wiki
     {
         private readonly string _overrideUrl;
 
+        public bool IsLocal => false;
+
         public WikiSearcher()
         {
             

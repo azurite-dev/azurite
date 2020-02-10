@@ -8,7 +8,9 @@ using Microsoft.Extensions.Options;
 namespace Azurite.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [ApiVersion("1.0")]
+    // [Route("[controller]")]
+    [Route("api/v{version:apiVersion}")]
     public class InfoController : ControllerBase
     {
         private readonly IndexBuilder _builder;
@@ -19,13 +21,33 @@ namespace Azurite.Controllers
             _builder = builder;
             _builder.LogToConsole = true;
         }
-        [HttpGet]
+
+        /// <summary>
+        /// Retrieves basic app information.
+        /// </summary>
+        /// <remarks>
+        /// In general, this endpoint shouldn't be needed by consuming applications. 
+        /// It is provided as a convenience in case of future compatibility issues.
+        /// </remarks>
+        /// <returns></returns>
+        [HttpGet("/info")]
+        [ApiVersionNeutral]
         public IActionResult GetAppInfo() {
             return new ObjectResult(new {
-                time = DateTime.UtcNow
+                time = DateTime.UtcNow,
+                version = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             });
         }
 
+        /// <summary>
+        /// Invokes an index rebuild operation.
+        /// </summary>
+        /// <remarks>
+        /// Given the massive load this can invoke (and misconfiguration risks), by default this request 
+        /// can only be invoked from 'localhost' (i.e. the system the API is running on). This is controlled 
+        /// by the `Azurite.RebuildWhitelist` config option. This operation takes a *very* long time.
+        /// </remarks>
+        /// <returns>Status of the build request. 202 if successful, 423 if already in progress.</returns>
         [HttpPost("index")]
         [TypeFilter(typeof(Infrastructure.IndexRebuildAccessFilter))]
         public IActionResult RebuildIndex() {

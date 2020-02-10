@@ -29,8 +29,9 @@ namespace Azurite
         {
             services
                 .AddAzuriteServices()
-                .AddThrottlingServices(Configuration)
-                .AddSwashbuckle(Configuration);
+                .AddVersioning()
+                .AddSwashbuckle(Configuration)
+                .AddThrottlingServices(Configuration);
             
             services.Configure<Microsoft.AspNetCore.Routing.RouteOptions>(c => c.ConstraintMap.Add("timespan", typeof(Infrastructure.TimeSpanConstraint)));
             services.Configure<AzuriteOptions>(Configuration.GetSection("Azurite"));
@@ -38,9 +39,11 @@ namespace Azurite
                 .AddControllers()
                 .AddJsonOptions(opts => {
                     opts.JsonSerializerOptions.Converters.Add(new Infrastructure.TimeSpanConverter());
+                    opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
                     // opts.JsonSerializerOptions.
                 })
                 .AddXmlSerializerFormatters();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

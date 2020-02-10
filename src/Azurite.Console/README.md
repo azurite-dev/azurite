@@ -2,6 +2,8 @@
 
 The Azurite CLI is a simple local-only way to to get data on ships.
 
+> WARNING: There will be a significant change to this project in future to allow bypassing the index and hitting the backend providers directly. This may change how the current syntax works.
+
 ## Usage
 
 Thanks to [this awesome library the CLI uses](https://github.com/spectresystems/spectre.cli), you can use the `--help` option to get full options and descriptions of the available commands.

@@ -354,3 +354,6 @@ MigrationBackup/
 
 ships.db*
 samples/
+dist/
+out/
+*.r2r

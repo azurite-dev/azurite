@@ -107,15 +107,17 @@ namespace Azurite
         /// <value>The nation this ship hails from.</value>
         public Faction Faction {get;set;}
 
+        public ShipStatistics Statistics {get;set;}
+
         public IEnumerable<EquipmentSlot> Equipment {get;set;}
         
         public override string ToString() {
             return this.ToString(true);
         }
 
-        public string ToString(bool includeType) {
+        public string ToString(bool includeType, bool includeRetro = true) {
             var prefix = Faction.Prefix ?? string.Empty;
-            return $"{(string.IsNullOrWhiteSpace(prefix) ? string.Empty : prefix + " ")}{ShipName.EN}{(includeType ? $" ({Type.ToPrefix()})" : string.Empty)}";
+            return $"{(string.IsNullOrWhiteSpace(prefix) ? string.Empty : prefix + " ")}{ShipName.EN}{(includeType ? $" ({Type.ToPrefix()})" : string.Empty)}{(includeRetro && Helpers.IsRetrofit(ShipId) ? " (Retrofit)" : string.Empty)}";
         }
     }
 }

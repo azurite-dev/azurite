@@ -17,6 +17,9 @@
     "equipment":
     {
         "_xpath": "//table[@class='wikitable']//th[contains(text(), 'Equipment')]/../following-sibling::tr[position()>1]",
+        "_transformations": [
+            "TrimTransformation"
+        ],
         "slot": "./td[1]/text()",
         "efficiency": "./td[2]",
         "equip": "./td[3]"

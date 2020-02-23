@@ -2,12 +2,21 @@ using System.Collections.Generic;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Azurite
 {
+    public static class EndpointExtensions {
+        public static IEndpointConventionBuilder MapVersion(this IEndpointRouteBuilder endpoints, string pattern) {
+            var pipeline = endpoints.CreateApplicationBuilder()
+                .UseMiddleware<Infrastructure.VersionMiddleware>()
+                .Build();
+            return endpoints.Map(pattern, pipeline).WithDisplayName("Version number");
+        }
+    }
     public static class StartupExtensions {
         public static IServiceCollection AddAzuriteServices(this IServiceCollection services) {
             services.AddSingleton<Wiki.WikiSearcher>();

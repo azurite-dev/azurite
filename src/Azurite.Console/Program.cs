@@ -13,6 +13,7 @@ namespace Azurite.Console
     {
         static async Task<int> Main(string[] args)
         {
+            // await GetShip();
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             var services = new ServiceCollection();
             services.AddSingleton<WikiSearcher>();
@@ -33,5 +34,13 @@ namespace Azurite.Console
             });
             return await app.RunAsync(args);
         }
+
+#if DEBUG
+        static async Task GetShip() {
+            var searcher = new WikiSearcher();
+            var result = (await searcher.GetShipDetails("Mogami")).ToList();
+            var results = (await searcher.GetShipDetails("Mogami")).ToList();
+        }
+#endif
     }
 }

@@ -10,17 +10,18 @@ This API aims to provide basic API access for some data surrounding Azur Lane sh
 
 This is a new project that's been hacked together over a week or so. As such, it still has some pretty big missing functionality:
 
-- **No stats**: This is planned for right after the API is complete
-  - stats as they currently stand are also using a (sort of unwieldy) fixed schema. This might change in future versions.
 - **No skins**: Still unsure whether this will be included in the API.
 - **Talents**: Talents aren't available and *may not ever be*. Limitations in how we're retrieving data make it a fragile process to build.
 - **Equipment**: Equipment slots are currently included in ship details, but this is currently in preview and **heavily** subject to change
+- **Statistics** are implemented, but as they currently stand are also using a (sort of unwieldy) fixed schema. This might change in future versions.
 
 > If there are specific features you would like to see implemented (within reason), open an issue and we can discuss the viability.
 
 ### Data Sources
 
 At current, this project retrieves data from the [Azur Lane Wiki](https://azurlane.koumakan.jp/Azur_Lane_Wiki). Since an API that just returned a parsed wiki page per-request would be punishingly awful for the backend wiki, this project includes an "indexing" layer (called `Azurite.Index`) that serves as part-cache, part-database for ship data retrieved from the Wiki. This index does have to be fully populated at least once!
+
+> There's also some light HTTP caching in the Wiki interface code, but `Index` is the superior solution.
 
 #### Alternative Sources
 

@@ -1,0 +1,16 @@
+{
+    "_xpath": "//div[@class='nomobile']//div[@class='tabbertab']",
+    "_transformations": [
+        "TrimTransformation"
+    ],
+    "title": "./@title",
+    "values": {
+        "_xpath": ".//th",
+        "_transformations": [
+            "TrimTransformation"
+        ],
+        "name": "./img/@alt",
+        "altName": "./span/@title",
+        "value": "./following-sibling::td[1]/text()"
+    }
+}

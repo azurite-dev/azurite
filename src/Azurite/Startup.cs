@@ -40,7 +40,6 @@ namespace Azurite
                 .AddJsonOptions(opts => {
                     opts.JsonSerializerOptions.Converters.Add(new Infrastructure.TimeSpanConverter());
                     opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-                    // opts.JsonSerializerOptions.
                 })
                 .AddXmlSerializerFormatters();
             
@@ -66,6 +65,7 @@ namespace Azurite
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapVersion("/version");
                 endpoints.MapControllers();
             });
         }

@@ -12,8 +12,8 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/src/Azurite.Console/bin/Debug/netcoreapp3.1/Azurite.Console.dll",
-            // "args": ["index", "--verbose"],
-            "args": ["list", "by-name", "Mogami", "-r"],
+            "args": ["index", "--verbose"],
+            // "args": ["list", "by-name", "Mogami", "-r"],
             "cwd": "${workspaceFolder}/src/Azurite.Console",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",
@@ -36,7 +36,8 @@
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
-                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
+                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)",
+                "uriFormat": "%s/version"
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Hosted"

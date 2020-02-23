@@ -1,6 +1,6 @@
-namespace Azurite.Core
+namespace Azurite
 {
-    public class ShipStatistics
+    public class StatisticsSet
     {
         public int HP { get; set; }
         public int Firepower { get; set; }
@@ -24,5 +24,11 @@ namespace Azurite.Core
             Medium,
             Heavy
         }
+    }
+
+    public class ShipStatistics {
+        public StatisticsSet Base {get;set;}
+        public StatisticsSet Level100 {get;set;}
+        public StatisticsSet Level120 {get;set;}
     }
 }

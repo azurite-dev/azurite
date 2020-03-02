@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Cake Action
+      uses: ecampidoglio/cake-action@v1.1.1
+      with:
+        # The name of the task to execute. Note that this argument must be supported by the script.
+        target: Publish-Docker-Image
+      env: # Or as an environment variable
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

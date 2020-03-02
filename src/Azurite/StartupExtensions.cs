@@ -11,7 +11,16 @@ using Microsoft.Extensions.Options;
 
 namespace Azurite
 {
+    /// <summary>
+    /// Extensions to the ASP.NET Core endpoint routing model
+    /// </summary>
     public static class EndpointExtensions {
+        /// <summary>
+        /// Adds the <see cref="Infrastructure.VersionMiddleware" /> to the endpoint routing pipeline.
+        /// </summary>
+        /// <param name="endpoints">The endpoint route builder.</param>
+        /// <param name="pattern">The route pattern to match for the version middleware.</param>
+        /// <returns>The <see cref="IEndpointConventionBuilder" /> for the endpoint mapping.</returns>
         public static IEndpointConventionBuilder MapVersion(this IEndpointRouteBuilder endpoints, string pattern) {
             var pipeline = endpoints.CreateApplicationBuilder()
                 .UseMiddleware<Infrastructure.VersionMiddleware>()
@@ -19,7 +28,16 @@ namespace Azurite
             return endpoints.Map(pattern, pipeline).WithDisplayName("Version number");
         }
     }
+    /// <summary>
+    /// Extensions to the ASP.NET Core Startup process/model.
+    /// </summary>
     public static class StartupExtensions {
+
+        /// <summary>
+        /// Adds all of Azurite's required services to the service container.
+        /// </summary>
+        /// <param name="services">The service container.</param>
+        /// <returns>The service container.</returns>
         public static IServiceCollection AddAzuriteServices(this IServiceCollection services) {
             services.AddSingleton<Wiki.WikiSearcher>();
             services.AddSingleton<Index.ShipDbClient>();
@@ -47,6 +65,12 @@ namespace Azurite
             }
         }
 
+        /// <summary>
+        /// Adds all the services required for enabling rate limiting/throttling.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="config">The app config.</param>
+        /// <returns>The service container.</returns>
         public static IServiceCollection AddThrottlingServices(this IServiceCollection services, IConfiguration config) {
             services.AddMemoryCache();
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
@@ -58,6 +82,12 @@ namespace Azurite
             return services;
         }
 
+        /// <summary>
+        /// Adds all the services and configuration required for Swashbuckle integration.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="config">The application config.</param>
+        /// <returns>The service collection.</returns>
         public static IServiceCollection AddSwashbuckle(this IServiceCollection services, IConfiguration config) {
             services.AddSwaggerGen(c => {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { 
@@ -79,6 +109,11 @@ namespace Azurite
             return services;
         }
 
+        /// <summary>
+        /// Adds services for API versioning (including versioned ApiExplorer support).
+        /// </summary>
+        /// <param name="services">The service container.</param>
+        /// <returns>The service container.</returns>
         public static IServiceCollection AddVersioning(this IServiceCollection services) {
             services.AddVersionedApiExplorer(o => {
                 o.GroupNameFormat = "'v'VVV";
@@ -88,6 +123,11 @@ namespace Azurite
             return services;
         }
 
+        /// <summary>
+        /// Adds Swashbuckle integration and generation to the app. Assumes /api/ path.
+        /// </summary>
+        /// <param name="app">The app builder.</param>
+        /// <returns>The app builder.</returns>
         public static IApplicationBuilder UseSwashbuckle(this IApplicationBuilder app) {
             app.UseSwagger(o => {
                 o.RouteTemplate = "/api/{documentName}/swagger.json";
@@ -98,6 +138,12 @@ namespace Azurite
             return app;
         }
 
+        /// <summary>
+        /// Adds services for rate limiting/throttling to the app. Includes Swashbuckle whitelisting.
+        /// </summary>
+        /// <param name="app">The app builder.</param>
+        /// <param name="whitelistSwagger">Whether to whitelist Swagger/Swashbuckle endpoints.</param>
+        /// <returns>The app builder.</returns>
         public static IApplicationBuilder UseThrottling(this IApplicationBuilder app, bool whitelistSwagger = true) {
             var opts = app.ApplicationServices.GetService<IOptions<IpRateLimitOptions>>();
             opts.Value.EnableEndpointRateLimiting = true;

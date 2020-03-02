@@ -12,6 +12,10 @@ namespace Azurite.Console
             [CommandArgument(0, "<ID>")]
             [Description("The ID of the ship to get details for. Check `list by-name` to get an ID for the ship.")]
             public string ShipId {get;set;}
+
+            [CommandOption("-s|--stat-level")]
+            [Description("Ship level to get stats for. Supports '0' (base), '100' or '120'.")]
+            public int StatLevel {get;set;} = -1;
         }
         public ShowCommand(IShipDataProvider provider) : base(provider)
         {
@@ -25,7 +29,10 @@ namespace Azurite.Console
                 return 404;
             }
             var details = await _provider.GetShipDetails(ship.First());
-            return PrintSingleShip(details);
+            if (Helpers.IsRetrofit(details.ShipId) && settings.StatLevel == 0) {
+                settings.StatLevel = -1;
+            }
+            return PrintSingleShip(details, statLevel: settings.StatLevel);
         }
     }
 }

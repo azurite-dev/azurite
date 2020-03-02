@@ -46,7 +46,7 @@ namespace Azurite
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -58,6 +58,12 @@ namespace Azurite
             // app.UseIpRateLimiting();
             app.UseThrottling();
             app.UseSwashbuckle();
+
+            if (System.IO.Directory.Exists(env.WebRootPath)) {
+                logger.LogInformation($"Static file path located at {env.WebRootPath}. Enabling static file serving.");
+                app.UseDefaultFiles();
+                app.UseStaticFiles();
+            }
 
             app.UseRouting();
 

@@ -40,7 +40,7 @@
                 "uriFormat": "%s/version"
             },
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Hosted"
+                "ASPNETCORE_ENVIRONMENT": "Development"
             }
         }
     ]

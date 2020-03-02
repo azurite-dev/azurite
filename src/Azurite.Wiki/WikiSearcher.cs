@@ -3,54 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Azurite.Diagnostics;
 using Azurite.Wiki.Diagnostics;
-using Microsoft.Extensions.Caching.InMemory;
 using Polly;
 using static Azurite.Helpers;
 
 namespace Azurite.Wiki
 {
-    public class WikiSearcher : IShipDataProvider
+    public class WikiSearcher : WikiClientBase, IShipDataProvider
     {
-        private readonly string _overrideUrl;
-        private HttpClient httpClient {get;} = BuildHttpClient();
-
-        public bool IsLocal => false;
-
-        private static HttpClient BuildHttpClient() {
-            return new CachedHttpClient();
-        }
-
         public WikiSearcher()
         {
         }
 
-        public WikiSearcher(HttpClient client) : this()
+        public WikiSearcher(HttpClient client) : base(client)
         {
-            httpClient = client;
         }
 
-        public WikiSearcher(string baseUrl)
+        public WikiSearcher(string baseUrl) : base(baseUrl)
         {
-            _overrideUrl = baseUrl;
-        }
-
-        private async Task<string> GetHtml(Uri url)
-        {
-            try {
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0 Azurite/{typeof(WikiSearcher).Assembly.GetName().Version.ToString()}");
-                var html = await httpClient.GetStringAsync(url.AbsoluteUri);
-                return html;
-            }
-            catch (Exception e) {
-                throw new FetchPageException($"Failed to fetch HTML from request to {url}", e);
-            }
         }
 
         private async Task<string> GetPageHtml(string path) {
             return await GetHtml(new Uri($"{_overrideUrl ?? ConfigConstants.baseUrl}{path.TrimStart('/')}"));
         }
+
+        public bool UseMobileView {get;set;} = true;
 
         /// <remarks>
         /// Calling this method invokes ONE page load and ONE parse operations
@@ -98,15 +75,26 @@ namespace Azurite.Wiki
             var op = await fetch.ExecuteAndCaptureAsync(() => GetPageHtml(GetPageNameForShipName(shipName)));
             if (op.Outcome == OutcomeType.Failure) throw new FetchPageException("Failed to fetch ship details", op.FinalException);
             var html = op.Result;
-            var result = html.ExtractFromHtml("shipDetails");
-            var stats = html.ExtractFromHtml("shipStats");
+            var result = html.ExtractFromHtml("shipDetails.mobile");
+            var stats = html.ExtractFromHtml("shipStats.mobile");
             var name = result["name"].ToString().Before(" - ");
-            if (string.IsNullOrWhiteSpace(result["name"]?.ToString()) || string.IsNullOrWhiteSpace(result["header"]?.ToString())) {
-                throw new Diagnostics.ShipNotFoundException(name ?? shipName);
+            if (!string.IsNullOrWhiteSpace(result["hidden_header"]?.ToString())
+                || string.IsNullOrWhiteSpace(result["name"]?.ToString()) 
+                || string.IsNullOrWhiteSpace(result["header"]?.ToString())
+            ) {
+                throw new Diagnostics.ShipNotFoundException(name ?? shipName); 
             }
-            var t = result["build_time"].ToString();
-            var id = forceId ?? result["id"].ToString();
-            var type = result["type_main"].ToString();
+            // var t = result["build_time"].ToString();
+            var t = result["build_time"]?.ToString() ?? result["build"]?.ToString() ?? "";
+            var id = forceId ?? result["description"].ToString().Split('(',')')[1];
+            // var type = result["description"].ToString().Before("(").Split(result["faction_name"]).Last();
+            var typeFull = result["type_main"].ToString();
+            // ↓↓ this is terrible: it's pretty specific to the mobile layout and I need to look at improving the way multi-classification ships are handled
+            (string type, string subType) = typeFull.Contains("→")
+                ? (result["type_main"].ToString().Split('→').First(), result["type_main"].ToString().Split('→').Last())
+                : (typeFull, null);
+            var rarity = forceRarity ?? ParseRarity(result["rarity_category"].ToString().Split(':', ' ').Skip(1).First()); // this is also bad and will fail on non-mobile HTML
+            int slot = 0;
             return new Ship {
                 ShipId = id,
                 ShipName = new ShipName(
@@ -117,26 +105,24 @@ namespace Azurite.Wiki
                 ),
                 BuildTime = t.ParseTimeSpan(),
                 BuildType = t.All(c => char.IsDigit(c) || c == ':') ? "" : t,
-                Type = IsRetrofit(id) ? (result["type_sub"]?.ToString() ?? type) : type,
+                Type = (IsRetrofit(id) ? subType ?? type : type).Trim().ToTitleCase(),
                 //Subtype = result["type_sub"]?.ToString(),
-                Class = result["class"].ToString(),
-                Stars = new Stars { 
-                    Default = result["stars"].ToString().Where(c => c == '★').Count(),
-                    Max = result["stars"].ToString().Count()
-                },
+                Class = result["class"].ToString().Replace("-class", ""),
+                Stars = rarity.ToStarRating(),
                 Faction = new Faction {
                     Name = result["faction_name"].ToString(),  
-                    Prefix = result["title_full"].ToString().Before(name)
+                    Prefix = result["name_full"].ToString().Before(name)
                 },
                 Equipment = result["equipment"].Select(e => {
+                    slot++;
                     return new EquipmentSlot {
-                        Slot = int.TryParse(e["slot"].ToString(), out var slot) ? slot : 0,
+                        Slot = slot,
                         Efficiency = e["efficiency"]?.ToString() ?? "",
-                        Type = ParseEquipType(e["equip"]?.ToString())
+                        Type = ParseEquipType(e["equip"], IsRetrofit(id))
                     };
                 }),
                 Statistics = ParseStatistics(stats, IsRetrofit(id)),
-                Rarity = forceRarity ?? ParseRarity(result["rarity"].ToString()),
+                Rarity = rarity,
                 Url = $"{_overrideUrl ?? ConfigConstants.baseUrl}{GetPageNameForShipName(shipName)}",
             };
         }
@@ -149,15 +135,25 @@ namespace Azurite.Wiki
             ship.Level100 = applicableStats.FirstOrDefault(s => s["title"].ToString().StartsWith("Level 100"))?.ToStatistics();
             ship.Level120 = applicableStats.FirstOrDefault(s => s["title"].ToString().StartsWith("Level 120"))?.ToStatistics();
             ship.Base = isRetrofit ? null : stats.FirstOrDefault(s => s["title"].ToString().Contains("Base")).ToStatistics();
-            return ship;            
+            return ship;
         }
 
-        private string ParseEquipType(string typeText, bool isRetrofit = false) {
-            if (string.IsNullOrWhiteSpace(typeText)) return "";
-            var split = typeText.Split('/').Select(s => s.Trim());
-            return isRetrofit
-                ? split.Last()
-                : split.FirstOrDefault() ?? "";
+        private string ParseEquipType(Newtonsoft.Json.Linq.JToken typeText, bool isRetrofit = false) {
+            if (string.IsNullOrWhiteSpace(typeText?.ToString())) return "";
+            if (typeText is Newtonsoft.Json.Linq.JArray) {
+                var equips = typeText.Select(t => t?.ToString() ?? "").Where(e => !string.IsNullOrWhiteSpace(e));
+                return (isRetrofit
+                    // ? string.Join(" / ", equips.Select(e => e.Replace("Retrofit", "", true, System.Globalization.CultureInfo.InvariantCulture).Trim('(', ')').Trim()))
+                    ? string.Join(" / ", equips)
+                    : string.Join(" / ", equips.Where(e => !e.ToLower().Contains("retrofit"))))
+                    ?? "";
+            } else {
+                var split = typeText?.ToString().Split('/').Select(s => s.Trim());
+                return isRetrofit
+                    ? split.Last()
+                    : split.FirstOrDefault() ?? "";
+            }
+            
         }
 
         /// <summary>
@@ -187,6 +183,10 @@ namespace Azurite.Wiki
         /// <param name="summary">A ship <see cref="Azurite.ShipSummary"/> to get details for.</param>
         /// <returns>A Task for the details of the requested ship.</returns>
         public async Task<Ship> GetShipDetails(ShipSummary summary) {
+            if (string.IsNullOrWhiteSpace(summary.Name)) {
+                var ship = (await GetShipList()).FirstOrDefault(s => s.Id.Equals(summary.Id, StringComparison.InvariantCultureIgnoreCase));
+                return await GetShipDetails(ship);
+            }
             return await GetShipDetails(summary.Name, summary.Id, ParseRarity(summary.Rarity));
         }
 

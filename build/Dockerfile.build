@@ -1,4 +1,4 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
-COPY out/ /app
+COPY publish/dotnet-any/ /app/
 ENTRYPOINT ["dotnet", "Azurite.dll"]

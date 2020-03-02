@@ -13,13 +13,14 @@ namespace Azurite.Console
     {
         static async Task<int> Main(string[] args)
         {
-            // await GetShip();
+            //await GetShip();
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             var services = new ServiceCollection();
             services.AddSingleton<WikiSearcher>();
             services.AddSingleton<ShipDbClient>();
             services.AddSingleton<IndexBuilder>();
-            services.AddSingleton<IShipDataProvider, IndexedDataProvider>();
+            services.AddSingleton<IndexedDataProvider>();
+            services.AddSingleton<IShipDataProvider>(ProviderHelpers.GetShipDataProvider);
             var app = new CommandApp(new DependencyInjectionRegistrar(services));
             app.Configure(c => {
                 c.AddBranch("list", ls => {
@@ -35,11 +36,14 @@ namespace Azurite.Console
             return await app.RunAsync(args);
         }
 
+        
+
 #if DEBUG
         static async Task GetShip() {
             var searcher = new WikiSearcher();
-            var result = (await searcher.GetShipDetails("Mogami")).ToList();
-            var results = (await searcher.GetShipDetails("Mogami")).ToList();
+            // var result = (await searcher.GetShipDetails("Pensacola")).ToList();
+            // var results = (await searcher.GetShipDetails("Salt Lake City")).ToList();
+            var results = (await searcher.GetShipDetails("London")).ToList();
         }
 #endif
     }

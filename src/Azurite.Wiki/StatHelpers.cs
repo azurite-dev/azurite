@@ -9,9 +9,19 @@ namespace Azurite.Wiki
             var set = new StatisticsSet();
             foreach (var item in statPackage["values"])
             {
-                set.AddStat(item["name"]?.ToString() ?? item["altName"]?.ToString(), item["value"].ToString());
+                if (item.ParseStat(out (string key, string value) stat)) {
+                    set.AddStat(stat.key, stat.value);
+                }
+                // set.AddStat(item["name"]?.ToString() ?? item["altName"]?.ToString(), item["value"].ToString());
             }
             return set;
+        }
+
+        private static bool ParseStat(this Newtonsoft.Json.Linq.JToken item, out (string key, string value) stat) {
+            var name = item["name"]?.ToString() ?? item["altName"]?.ToString();
+            var value = item["value"]?.ToString();
+            stat = (name, value);
+            return !string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(value);
         }
         internal static StatisticsSet AddStat(this StatisticsSet set, (string name, string abbrev) s, string value) {
             switch (s.abbrev)

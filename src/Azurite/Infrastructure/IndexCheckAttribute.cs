@@ -21,10 +21,26 @@ namespace Azurite.Infrastructure
 
         public override void OnActionExecuting(ActionExecutingContext context) {
             _logger.LogTrace($"Running {nameof(IndexCheckAttribute)} for request.");
-            var ships = _provider.GetShipList().Result.Any();
-            if (!ships) {
-                _logger.LogWarning($"Executing {context.RouteData.ToString()} failed as no results were returned from data provider!");
+            var ships = _provider?.GetShipList()?.Result?.Any();
+            if (ships == null || !ships.Value) {
+                _logger.LogWarning($"Executing {context.HttpContext.Request.Path.ToString()} failed as no results were returned from data provider!");
                 context.Result = new IndexFailedResult();
+            }
+        }
+    }
+    public class ProviderHealthAttribute : ActionFilterAttribute {
+        private readonly IShipDataProvider _provider;
+
+        public ProviderHealthAttribute(IShipDataProvider provider, IOptions<AzuriteOptions> options, ILogger<ProviderHealthAttribute> logger)
+        {
+            _provider = provider;
+        }
+
+        public override void OnActionExecuted(ActionExecutedContext context) {
+            if (!_provider.IsLocal) {
+                context.HttpContext.Response.Headers.Add("X-Azurite-Status", "WARNING");
+            } else {
+                context.HttpContext.Response.Headers.Add("X-Azurite-Status", "Healthy");
             }
         }
     }

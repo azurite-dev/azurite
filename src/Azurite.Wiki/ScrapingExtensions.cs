@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using OpenScraping;
 using OpenScraping.Config;
@@ -33,5 +34,13 @@ namespace Azurite.Wiki
             var reader = new System.IO.StreamReader(stream);
             return StructuredDataConfig.ParseJsonString(reader.ReadToEnd());
         }
+
+        internal static IEnumerable<string> SplitOn(this string s, string separator) {
+            return s.Split(new[] { separator}, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        internal static string GetValue(this IDictionary<string, string> dict, string key) {
+            return dict.FirstOrDefault(s => s.Key == key).Value;
+        } 
     }
 }

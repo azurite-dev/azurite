@@ -5,6 +5,7 @@ COPY ./Azurite/*.csproj Azurite/
 COPY ./Azurite.Core/*.csproj Azurite.Core/
 COPY ./Azurite.Index/*.csproj Azurite.Index/
 COPY ./Azurite.Wiki/*.csproj Azurite.Wiki/
+# RUN find -type d -name bin -prune -exec rm -rf {} \; && find -type d -name obj -prune -exec rm -rf {} \;
 RUN dotnet restore Azurite/Azurite.csproj
 
 COPY Azurite/ Azurite/
@@ -17,7 +18,7 @@ RUN dotnet build -c release --no-restore
 FROM build AS publish
 RUN dotnet publish -c release --no-build -o /app
 
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Azurite.dll"]

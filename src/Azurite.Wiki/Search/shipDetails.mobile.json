@@ -1,0 +1,31 @@
+{
+    "_removeXPaths": [
+        "//script"
+    ],
+    "header": "//div[@class='mw-parser-output']/div[not(@style='display:none')]",
+    "hidden_header": "//div[@style='display:none']/div/table[@id='Header']",
+    "name": "//meta[@property='og:title'][1]/@content",
+    "name_full": "//table[@id='Header']/tbody/tr[2]/th/text()",
+    "class": "//table[@id='Header']/tbody/tr[2]//span/text()",
+    "description": "//meta[@property='og:description'][1]/@content",
+    "name_cn": "//td/span[@lang='zh']/text()",
+    "name_jp": "//td/span[@lang='ja']/text()",
+    "name_kr": "//td/span[@lang='ko']/text()",
+    "build": "//table[@id='Header']/following-sibling::table[1]//th[contains(text(), 'Construction') or contains(text(), 'Obtainment')][1]/ancestor-or-self::tr/following-sibling::tr[1]//a",
+    "build_time": "//a[contains(@href, '/Building#List')]",
+    "type_main": "//th[contains(text(), 'Classification')]/../following-sibling::tr[1]/td",
+    "type_sub": "//th[contains(text(), 'Classification')][1]/following-sibling::td/a[contains(@title, 'Category')][2]/text()",
+    "stars": "//th[contains(text(), 'Rarity')]/following-sibling::td/text()",
+    "rarity_category": "//table[2]/tbody//a[contains(@href, '_ships')]/@title",
+    "faction_name": "//th[contains(text(), 'Nation')]/../following-sibling::tr//a[1]/@title",
+    "equipment":
+    {
+        "_xpath": "//table[@id='Equipment']/tbody//td",
+        "_transformations": [
+            "TrimTransformation"
+        ],
+        "slot": ".",
+        "efficiency": "./br/following-sibling::text()[1]",
+        "equip": "./a/text()"
+    }
+}

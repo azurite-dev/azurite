@@ -28,7 +28,7 @@ namespace Azurite.Console
         public class IndexCommandSettings : CommandSettings {
             [CommandOption("-d|--delay")]
             [Description("Delay in seconds between fetching ship details. Dramatically increases refresh build time (potentially over an hour) but dramatically eases load on source (i.e. wiki). Defaults to 5s.")]
-            public float Delay {get;set;} = 2.5F;
+            public float Delay {get;set;} = 5F;
 
             [CommandOption("-m|--missing")]
             [Description("Attempts to only retrieve details for ships not already in the index.")]

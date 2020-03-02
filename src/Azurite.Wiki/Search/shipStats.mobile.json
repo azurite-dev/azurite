@@ -1,0 +1,16 @@
+{
+    "_xpath": "//table[@id='Statistics']//div[@class='tabbertab']",
+    "_transformations": [
+        "TrimTransformation"
+    ],
+    "title": "./@title",
+    "values": {
+        "_xpath": ".//th",
+        "_transformations": [
+            "TrimTransformation"
+        ],
+        "name": "./img/@alt",
+        "altName": "./text()",
+        "value": "./following-sibling::td[1]/text()"
+    }
+}

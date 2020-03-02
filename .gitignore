@@ -357,3 +357,4 @@ samples/
 dist/
 out/
 *.r2r
+tools/

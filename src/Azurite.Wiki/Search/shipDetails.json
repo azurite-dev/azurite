@@ -1,8 +1,12 @@
 {
+    "_removeXPaths": [
+        "//script"
+    ],
     "header": "//div[@class='mw-parser-output']/div[not(@style='display:none')]",
     "id": "//th[contains(text(),'ID')][1]/following-sibling::td/text()",
     "name": "//meta[@property='og:title'][1]/@content",
-    "name_cn": "//div/span[@lang='zh']/text()",
+    "description": "//meta[@property='og:description'][1]/@content",
+    "name_cn": "//div/span[@lang='zh'][0]/text()",
     "name_jp": "//div/span[@lang='ja']/text()",
     "name_kr": "//div/span[@lang='ko']/text()",
     "build_time_basic": "//a[contains(@href, 'Construction')][not(contains(@href, 'Building'))]/text()",

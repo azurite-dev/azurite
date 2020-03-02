@@ -12,6 +12,7 @@ namespace Azurite.Controllers
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [TypeFilter(typeof(IndexCheckAttribute))]
+    [TypeFilter(typeof(ProviderHealthAttribute))]
     /// <summary>
     /// Actions relating to ships and ship data, including listing and querying ships.
     /// </summary>

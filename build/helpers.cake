@@ -34,16 +34,10 @@ ProjectCollection GetProjects(FilePath slnPath, string configuration) {
     
 }
 
-
-public string GetRuntimeBuild(string runtime) {
-    var commands = new Dictionary<string, string> {
-        ["centos.8-x64"] = "-t rpm -d libunwind -d libicu",
-        ["fedora.31-x64"] = "-t rpm -d libunwind -d libicu",
-        ["ubuntu.16.04-x64"] = "-t deb -d libunwind8 -d libicu52",
-        ["ubuntu.18.04-x64"] = "-t deb -d libunwind8 -d libicu52",
-        ["debian.10-x64"] = "-t deb -d libunwind8 -d libicu52",
-        ["rhel.8-x64"] = "-t rpm -d libunwind -d libicu"
+public Dictionary<string, string> GetPackageFormats() {
+    return new Dictionary<string, string> {
+        ["fc31"] = "-t rpm -d libunwind -d libicu",
+        ["el8"] = "-t rpm -d libunwind -d libicu",
+        ["bionic"] = "-t deb -d libunwind8 -d libicu60"
     };
-    var s = commands[runtime];
-    return s;
 }

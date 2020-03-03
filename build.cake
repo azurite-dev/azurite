@@ -147,14 +147,14 @@ Task("Publish-Runtime")
     */
 	var settings = new DotNetCorePublishSettings {
 		Runtime = runtime,
-		Configuration = configuration
+		Configuration = configuration,
+		//NoBuild = true
 	};
 	DotNetCorePublish(solutionPath, settings);
 	var publishDir = $"./src/Azurite/bin/{configuration}/{framework}/{runtime}/publish/";
 	var conPublishDir = $"./src/Azurite.Console/bin/{configuration}/{framework}/{runtime}/publish/";
 	CopyDirectory(publishDir, runtimeDir);
 	CopyDirectory(conPublishDir, consoleDir);
-	CopyFiles(GetFiles("./scripts/*.sh"), consoleDir);
 	CreateDirectory($"{artifacts}archive");
 	Zip(runtimeDir, $"{artifacts}archive/azurite-{runtime}.zip");
     }
@@ -168,23 +168,28 @@ Task("Build-Linux-Packages")
 	Information("Building packages in new container");
 	CreateDirectory($"{artifacts}/packages/");
 	foreach(var project in projects.SourceProjects.Where(p => p.Name == "Azurite")) {
+		//CopyFiles(GetFiles("./scripts/*.sh"), $"{artifacts}scripts");
         var runtime = "linux-x64";
         var publishDir = $"{artifacts}publish/{project.Name}/{runtime}";
+		//var scriptsDir = MakeAbsolute(Directory($"{artifacts}scripts"));
         var sourceDir = MakeAbsolute(Directory(publishDir));
         var packageDir = MakeAbsolute(Directory($"{artifacts}packages/{runtime}"));
-        var runSettings = new DockerContainerRunSettings {
-            Name = $"docker-fpm-{(runtime.Replace(".", "-"))}",
-            Volume = new[] { $"{sourceDir}:/src:ro", $"{packageDir}:/out:rw"},
-            Workdir = "/out",
-            Rm = true,
-            //User = "1000"
-        };
-        var opts = @"-s dir -a x86_64 --force
-        -m 'Alistair Chapman <alistair@agchapman.com>'
-        -n 'azurite-server'
-        --after-install /src/post-install.sh
-        --before-remove /src/pre-remove.sh";
-        DockerRun(runSettings, "tenzer/fpm", $"{opts} -v {packageVersion} {GetRuntimeBuild(runtime)} /src/=/usr/lib/azurite/");
+		foreach (var package in GetPackageFormats()) {
+			var runSettings = new DockerContainerRunSettings {
+				Name = $"docker-fpm-{(runtime.Replace(".", "-"))}",
+				Volume = new[] { 
+					$"{sourceDir}:/src:ro", 
+					$"{packageDir}:/out:rw",
+					$"{MakeAbsolute(Directory("./scripts/"))}:/scripts:ro",
+				},
+				Workdir = "/out",
+				Rm = true,
+				//User = "1000"
+			};
+			var opts = "-s dir -a x86_64 --force -m \"Alistair Chapman <alistair@agchapman.com>\" -n azurite-server --after-install /scripts/post-install.sh --before-remove /scripts/pre-remove.sh";
+			DockerRun(runSettings, "tenzer/fpm", $"{opts} -v {packageVersion} --iteration {package.Key} {package.Value} /src/=/usr/lib/azurite/");
+		}
+		//DeleteDirectory(scriptsDir, true);
 	}
 });
 

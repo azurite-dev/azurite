@@ -6,6 +6,6 @@ Task("Publish-Docker-Image")
     DockerLogin(new DockerRegistryLoginSettings{
         Password = token,
         Username = EnvironmentVariable("GITHUB_USER") ?? "agc93"
-    });
+    }, "docker.pkg.github.com");
     DockerPush($"docker.pkg.github.com/azurite-dev/azurite/server:{packageVersion}");
 });

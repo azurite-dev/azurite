@@ -246,7 +246,7 @@ Task("Build-Docker-Image")
 	Information("Building Docker image...");
 	CopyFileToDirectory("./build/Dockerfile.build", artifacts);
 	var bSettings = new DockerImageBuildSettings {
-        Tag = new[] { $"azurite-dev/azurite:{packageVersion}", $"docker.pkg.github.com/azurite-dev/azurite/server:{packageVersion}"},
+        Tag = new[] { $"azurite-dev/azurite:{packageVersion}", $"quay.io/azurite/azurite:{packageVersion}"},
         File = artifacts + "Dockerfile.build"
     };
 	DockerBuild(bSettings, artifacts);

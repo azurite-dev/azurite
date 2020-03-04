@@ -18,4 +18,8 @@
     <ProjectReference Include="..\Azurite.Index\Azurite.Index.csproj" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <AssemblyName>azurite</AssemblyName>
+  </PropertyGroup>
+
 </Project>

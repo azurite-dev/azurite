@@ -18,7 +18,7 @@ jobs:
     - name: Cake Action
       uses: ecampidoglio/cake-action@v1.1.1
       with:
-        target: Publish-Docker-Image
+        target: Release
         cake-bootstrap: true
       env:
         QUAY_USER: ${{secrets.QUAY_USER}}
@@ -32,6 +32,7 @@ jobs:
         files: |
           dist/packages/linux-x64/*
           dist/archive/*.zip
+          dist/publish/console/**/*.exe
         body: |
           Check [the releases docs](https://azurite.app/blog/releases/) for full information on updates and changes.
         draft: false

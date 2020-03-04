@@ -150,11 +150,11 @@ Task("Publish-Runtime")
 		Configuration = configuration,
 		//NoBuild = true
 	};
-	DotNetCorePublish(solutionPath, settings);
+	DotNetCorePublish("./src/Azurite/Azurite.csproj", settings);
 	var publishDir = $"./src/Azurite/bin/{configuration}/{framework}/{runtime}/publish/";
-	var conPublishDir = $"./src/Azurite.Console/bin/{configuration}/{framework}/{runtime}/publish/";
+	
 	CopyDirectory(publishDir, runtimeDir);
-	CopyDirectory(conPublishDir, consoleDir);
+	//CopyDirectory(conPublishDir, consoleDir);
 	CreateDirectory($"{artifacts}archive");
 	Zip(runtimeDir, $"{artifacts}archive/azurite-{runtime}.zip");
     }
@@ -190,6 +190,55 @@ Task("Build-Linux-Packages")
 	}
 });
 
+Task("Build-Console")
+	.IsDependentOn("Publish-Runtime")
+	.Does(() => 
+{
+	Information("Building console packages");
+	var runtimes = new[] { "linux-x64", "win-x64"};
+    foreach (var runtime in runtimes) {
+		var consoleDir = $"{artifacts}publish/console/{runtime}";
+		CreateDirectory(consoleDir);
+		Information("Publishing for {0} runtime", runtime);
+		var settings = new DotNetCorePublishSettings {
+			Runtime = runtime,
+			Configuration = configuration,
+			MSBuildSettings = new DotNetCoreMSBuildSettings()
+				.WithProperty("PublishSingleFile", "true")
+				.WithProperty("DebugType", "none")
+				.WithProperty("PublishTrimmed", "true"),
+			OutputDirectory = consoleDir
+		};
+		DotNetCorePublish("./src/Azurite.Console/Azurite.Console.csproj", settings);
+		var publishDir = $"./src/Azurite/bin/{configuration}/{framework}/{runtime}/publish/";
+		// CopyDirectory(publishDir, consoleDir);
+	}
+});
+
+Task("Build-Console-Packages")
+	.IsDependentOn("Build-Console")
+	.WithCriteria(IsRunningOnUnix())
+	.Does(() =>
+{
+	var runtime = "linux-x64";
+	var sourceDir = MakeAbsolute(Directory($"{artifacts}publish/console/{runtime}"));
+	var packageDir = MakeAbsolute(Directory($"{artifacts}packages/{runtime}"));
+	foreach (var package in GetPackageFormats()) {
+		var runSettings = new DockerContainerRunSettings {
+			Name = $"docker-fpm-{(runtime.Replace(".", "-"))}",
+			Volume = new[] { 
+				$"{sourceDir}:/src:ro", 
+				$"{packageDir}:/out:rw"
+			},
+			Workdir = "/out",
+			Rm = true,
+			//User = "1000"
+		};
+		var opts = "-s dir -a x86_64 --force -m \"Alistair Chapman <alistair@agchapman.com>\" -n azurite-cli";
+		DockerRun(runSettings, "tenzer/fpm", $"{opts} -v {packageVersion} --iteration {package.Key} {package.Value} /src/=/usr/local/bin/");
+		}
+});
+
 /*
 Task("Build-Windows-Packages")
 	.IsDependentOn("Publish-Runtimes")
@@ -222,18 +271,7 @@ Task("Build-Windows-Packages")
 	}
 });
 */
-/*
-Task("Build-Runtime-Package")
-	.IsDependentOn("Publish-Runtime")
-	.Does(() => 
-{
-	Information("Building dotnet package");
-	foreach(var project in projects.SourceProjects) {
-		CreateDirectory($"{artifacts}packages/dotnet-any");
-		Zip($"{artifacts}publish/{project.Name}/dotnet-any/", $"{artifacts}packages/dotnet-any/azurite-runtime.zip");
-	}
-});
-*/
+
 
 Task("Build-Docker-Image")
 	//.WithCriteria(IsRunningOnUnix())
@@ -251,17 +289,13 @@ Task("Build-Docker-Image")
 });
 
 #load "build/publish.cake"
-Task("Release")
-.IsDependentOn("Publish");
-//.IsDependentOn("Copy-To-Azure");
 
 Task("Default")
     .IsDependentOn("Post-Build");
 
 Task("Publish")
 	.IsDependentOn("Build-Linux-Packages")
-	//.IsDependentOn("Build-Windows-Packages")
-	//.IsDependentOn("Build-Runtime-Package")
+	.IsDependentOn("Build-Console-Packages")
 	.IsDependentOn("Build-Docker-Image");
 
 RunTarget(target);

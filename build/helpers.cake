@@ -37,7 +37,7 @@ ProjectCollection GetProjects(FilePath slnPath, string configuration) {
 public Dictionary<string, string> GetPackageFormats() {
     return new Dictionary<string, string> {
         ["fc31"] = "-t rpm -d libunwind -d libicu",
-        ["el8"] = "-t rpm -d libunwind -d libicu",
-        ["bionic"] = "-t deb -d libunwind8 -d libicu60"
+        ["el8"] = "-t rpm -d libicu",
+        ["bionic"] = "-t deb -d libicu60 -d libssl1.0.0"
     };
 }

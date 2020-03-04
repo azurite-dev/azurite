@@ -168,11 +168,8 @@ Task("Build-Linux-Packages")
 	Information("Building packages in new container");
 	CreateDirectory($"{artifacts}/packages/");
 	foreach(var project in projects.SourceProjects.Where(p => p.Name == "Azurite")) {
-		//CopyFiles(GetFiles("./scripts/*.sh"), $"{artifacts}scripts");
         var runtime = "linux-x64";
-        var publishDir = $"{artifacts}publish/{project.Name}/{runtime}";
-		//var scriptsDir = MakeAbsolute(Directory($"{artifacts}scripts"));
-        var sourceDir = MakeAbsolute(Directory(publishDir));
+        var sourceDir = MakeAbsolute(Directory($"{artifacts}publish/server/{runtime}"));
         var packageDir = MakeAbsolute(Directory($"{artifacts}packages/{runtime}"));
 		foreach (var package in GetPackageFormats()) {
 			var runSettings = new DockerContainerRunSettings {
